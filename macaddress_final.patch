@@ -1,0 +1,413 @@
+diff --git a/board/freescale/mx6sabresd/mx6sabresd.c b/board/freescale/mx6sabresd/mx6sabresd.c
+index 12d8c56..0563df9 100644
+--- a/board/freescale/mx6sabresd/mx6sabresd.c
++++ b/board/freescale/mx6sabresd/mx6sabresd.c
+@@ -24,6 +24,8 @@
+ #include <ipu_pixfmt.h>
+ #include <asm/io.h>
+ #include <asm/arch/sys_proto.h>
++#include <asm/imx-common/mxc_i2c.h>
++#include <i2c.h>
+ DECLARE_GLOBAL_DATA_PTR;
+ 
+ #define UART_PAD_CTRL  (PAD_CTL_PUS_100K_UP |			\
+@@ -146,6 +148,33 @@ static void setup_iomux_uart(void)
+ 	imx_iomux_v3_setup_multiple_pads(uart1_pads, ARRAY_SIZE(uart1_pads));
+ }
+ 
++#define I2C_PAD_CTRL    (PAD_CTL_PUS_100K_UP |                  \
++        PAD_CTL_SPEED_MED | PAD_CTL_DSE_40ohm | PAD_CTL_HYS |   \
++        PAD_CTL_ODE | PAD_CTL_SRE_FAST)
++
++struct i2c_pads_info i2c1_pad_info = {
++       .scl = {
++               .i2c_mode = MX6_PAD_CSI0_DAT9__I2C1_SCL
++                       | MUX_PAD_CTRL(I2C_PAD_CTRL),
++               .gpio_mode = MX6_PAD_CSI0_DAT9__GPIO5_IO27
++                       | MUX_PAD_CTRL(I2C_PAD_CTRL),
++               .gp = IMX_GPIO_NR(5, 27)
++       },
++       .sda = {
++               .i2c_mode = MX6_PAD_CSI0_DAT8__I2C1_SDA
++                       | MUX_PAD_CTRL(I2C_PAD_CTRL),
++               .gpio_mode = MX6_PAD_CSI0_DAT8__GPIO5_IO26
++                       | MUX_PAD_CTRL(I2C_PAD_CTRL),
++               .gp = IMX_GPIO_NR(5, 26)
++       }
++};
++#define CONFIG_SYS_I2C_SPEED           100000
++
++static void setup_i2c_wrapper(void)
++{
++       setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c1_pad_info);
++}
++
+ #ifdef CONFIG_FSL_ESDHC
+ struct fsl_esdhc_cfg usdhc_cfg[3] = {
+ 	{USDHC2_BASE_ADDR},
+@@ -477,6 +506,7 @@ int board_init(void)
+ 	setup_spi();
+ #endif
+ 
++	setup_i2c_wrapper();
+ 	return 0;
+ }
+ 
+diff --git a/common/Makefile b/common/Makefile
+index d12cba5..6695e75 100644
+--- a/common/Makefile
++++ b/common/Makefile
+@@ -108,6 +108,7 @@ obj-$(CONFIG_CMD_LICENSE) += cmd_license.o
+ obj-y += cmd_load.o
+ obj-$(CONFIG_LOGBUFFER) += cmd_log.o
+ obj-$(CONFIG_ID_EEPROM) += cmd_mac.o
++obj-$(CONFIG_SET_MAC) += cmd_setmac.o
+ obj-$(CONFIG_CMD_MD5SUM) += cmd_md5sum.o
+ obj-$(CONFIG_CMD_MEMORY) += cmd_mem.o
+ obj-$(CONFIG_CMD_IO) += cmd_io.o
+diff --git a/common/cmd_i2c.c b/common/cmd_i2c.c
+index ebce7d4..e38b14b 100644
+--- a/common/cmd_i2c.c
++++ b/common/cmd_i2c.c
+@@ -76,6 +76,7 @@
+ 
+ DECLARE_GLOBAL_DATA_PTR;
+ 
++#define MAX_NUM_PORTS   8
+ /* Display values from last command.
+  * Memory modify remembered values are different from display memory.
+  */
+@@ -93,6 +94,38 @@ static uint	i2c_mm_last_alen;
+  * When multiple buses are present, the list is an array of bus-address
+  * pairs.  The following macros take care of this */
+ 
++static struct __attribute__ ((__packed__)) eeprom {
++#ifdef CONFIG_SYS_I2C_EEPROM_CCID
++        u8 id[4];         /* 0x00 - 0x03 EEPROM Tag 'CCID' */
++        u8 major;         /* 0x04        Board revision, major */
++        u8 minor;         /* 0x05        Board revision, minor */
++        u8 sn[10];        /* 0x06 - 0x0F Serial Number*/
++        u8 errata[2];     /* 0x10 - 0x11 Errata Level */
++        u8 date[6];       /* 0x12 - 0x17 Build Date */
++        u8 res_0[40];     /* 0x18 - 0x3f Reserved */
++        u8 mac_count;     /* 0x40        Number of MAC addresses */
++        u8 mac_flag;      /* 0x41        MAC table flags */
++        u8 mac[MAX_NUM_PORTS][6];     /* 0x42 - 0x71 MAC addresses */
++        u32 crc;          /* 0x72        CRC32 checksum */
++#endif
++#ifdef CONFIG_SYS_I2C_EEPROM_NXID
++        u8 id[4];         /* 0x00 - 0x03 EEPROM Tag 'NXID' */
++        u8 sn[12];        /* 0x04 - 0x0F Serial Number */
++        u8 errata[5];     /* 0x10 - 0x14 Errata Level */
++        u8 date[6];       /* 0x15 - 0x1a Build Date */
++        u8 res_0;         /* 0x1b        Reserved */
++        u32 version;      /* 0x1c - 0x1f NXID Version */
++        u8 tempcal[8];    /* 0x20 - 0x27 Temperature Calibration Factors */
++        u8 tempcalsys[2]; /* 0x28 - 0x29 System Temperature Calibration Factors */
++        u8 tempcalflags;  /* 0x2a        Temperature Calibration Flags */
++        u8 res_1[21];     /* 0x2b - 0x3f Reserved */
++        u8 mac_count;     /* 0x40        Number of MAC addresses */
++        u8 mac_flag;      /* 0x41        MAC table flags */
++        u8 mac[MAX_NUM_PORTS][6];     /* 0x42 - x MAC addresses */
++        u32 crc;          /* x+1         CRC32 checksum */
++#endif
++} e;
++
+ #if defined(CONFIG_SYS_I2C_NOPROBES)
+ #if defined(CONFIG_SYS_I2C) || defined(CONFIG_I2C_MULTI_BUS)
+ static struct
+@@ -411,7 +444,8 @@ static int do_i2c_md ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]
+  * Syntax:
+  *	i2c mw {i2c_chip} {addr}{.0, .1, .2} {data} [{count}]
+  */
+-static int do_i2c_mw ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
++//static int do_i2c_mw ( cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
++int do_i2c_mw ( cmd_tbl_t *cmdtp, int flag, int argc,   char *argv[])
+ {
+ 	uchar	chip;
+ 	ulong	addr;
+diff --git a/common/cmd_nvedit.c b/common/cmd_nvedit.c
+index 5bcc324..e5eebd4 100644
+--- a/common/cmd_nvedit.c
++++ b/common/cmd_nvedit.c
+@@ -271,8 +271,6 @@ static int _do_env_set(int flag, int argc, char * const argv[])
+ 	hsearch_r(e, ENTER, &ep, &env_htab, env_flag);
+ 	free(value);
+ 	if (!ep) {
+-		printf("## Error inserting \"%s\" variable, errno=%d\n",
+-			name, errno);
+ 		return 1;
+ 	}
+ 
+diff --git a/common/cmd_setmac.c b/common/cmd_setmac.c
+new file mode 100644
+index 0000000..ca3c695
+--- /dev/null
++++ b/common/cmd_setmac.c
+@@ -0,0 +1,133 @@
++/* Copyright 2006 Freescale Semiconductor
++ * York Sun (yorksun@freescale.com)
++ *
++ * See file CREDITS for list of people who contributed to this
++ * project.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation; either version 2 of
++ * the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
++ * MA 02111-1307 USA
++ */
++
++#include <common.h>
++#include <command.h>
++#include <net.h>
++#include <miiphy.h>
++#define MAX_NUM_PORTS   8
++static struct __attribute__ ((__packed__)) eeprom {
++#ifdef CONFIG_SYS_I2C_EEPROM_CCID
++        u8 id[4];         /* 0x00 - 0x03 EEPROM Tag 'CCID' */
++        u8 major;         /* 0x04        Board revision, major */
++        u8 minor;         /* 0x05        Board revision, minor */
++        u8 sn[10];        /* 0x06 - 0x0F Serial Number*/
++        u8 errata[2];     /* 0x10 - 0x11 Errata Level */
++        u8 date[6];       /* 0x12 - 0x17 Build Date */
++        u8 res_0[40];     /* 0x18 - 0x3f Reserved */
++        u8 mac_count;     /* 0x40        Number of MAC addresses */
++        u8 mac_flag;      /* 0x41        MAC table flags */
++        u8 mac[MAX_NUM_PORTS][6];     /* 0x42 - 0x71 MAC addresses */
++        u32 crc;          /* 0x72        CRC32 checksum */
++#endif
++#ifdef CONFIG_SYS_I2C_EEPROM_NXID
++        u8 id[4];         /* 0x00 - 0x03 EEPROM Tag 'NXID' */
++        u8 sn[12];        /* 0x04 - 0x0F Serial Number */
++        u8 errata[5];     /* 0x10 - 0x14 Errata Level */
++        u8 date[6];       /* 0x15 - 0x1a Build Date */
++        u8 res_0;         /* 0x1b        Reserved */
++        u32 version;      /* 0x1c - 0x1f NXID Version */
++        u8 tempcal[8];    /* 0x20 - 0x27 Temperature Calibration Factors */
++        u8 tempcalsys[2]; /* 0x28 - 0x29 System Temperature Calibration Factors */
++        u8 tempcalflags;  /* 0x2a        Temperature Calibration Flags */
++        u8 res_1[21];     /* 0x2b - 0x3f Reserved */
++        u8 mac_count;     /* 0x40        Number of MAC addresses */
++        u8 mac_flag;      /* 0x41        MAC table flags */
++        u8 mac[MAX_NUM_PORTS][6];     /* 0x42 - 0x71 MAC addresses */
++        u32 crc;          /* 0x72        CRC32 checksum */
++#endif
++} e;
++
++static void set_mac_address(unsigned int index, const char *string)
++{
++        char *p = (char *) string;
++        unsigned int i;
++
++        if (!string) {
++                printf("Usage: setmac <n> XX:XX:XX:XX:XX:XX\n");
++                return;
++        }
++	
++        for (i = 0; *p && (i < 6); i++) {
++                e.mac[index][i] = simple_strtoul(p, &p, 16);
++                if (*p == ':')
++                        p++;
++        }
++}
++
++
++int set_mac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
++{
++int index1 = 0, index2 = 0, index3 = 0, index4 = 0, return_back;
++char check_array[13], *argv1[13], *argv2[4];
++int ref;
++char num[2];
++struct eth_device *dev;
++	for(ref=0;ref<13;ref++) 
++    		argv1[ref]=malloc(sizeof(char));
++	for(ref=0;ref<2;ref++)
++	        argv2[ref]=malloc(sizeof(char));
++    		if((argv[1][2] != ':')||(argv[1][5] != ':')|| (argv[1][8] != ':')|| (argv[1][11] != ':')||(argv[1][14] != ':'))
++    			{
++				printf("Wrong Pattern Observed.. Please Try commands properly Ex: setmac XX:XX:XX:XX:XX:XX \n");  
++				return 0;
++    			}
++
++    while(argv[1][index1] != '\0')
++    {
++        if(argv[1][index1] != ':')
++        {
++		check_array[index2] = argv[1][index1];
++		index1++;
++	    	index2++;
++		check_array[index2] = argv[1][index1];
++	    index2++;
++        } 
++        index1++;
++    }
++    argv2[0]= "dev";
++    do_i2c_bus_num(cmdtp, 1, 1, argv2);
++    argv2[1]= "0" ;
++    do_i2c_bus_num(cmdtp, 1, 2, argv2);
++    index2 = index2-1;
++    argv1[0]= "mw";
++    argv1[1]= "0x50";
++    argv1[4]= "1" ;
++    while(index4 < 6)
++    {
++         snprintf(argv1[2], sizeof(argv1[2]) ,"%d", index4);
++	snprintf(argv1[3], sizeof(argv1[3]) ,"%c%c",  check_array[index3],check_array[index3+1]);
++        do_i2c_mw(cmdtp, 0 , 5, argv1);
++        index4++;
++        index3 = index3 + 2;
++    }
++        set_mac_address(1, argv[1]) ;
++        eth_setenv_enetaddr("ethaddr", argv[1]);
++}
++
++
++U_BOOT_CMD(
++        setmac, 3, 1,  set_mac,
++	"display and program the system ID and MAC addresses in EEPROM",
++       ": command to program MAC Address to EEPROM\nUsage : setmac XX:XX:XX:XX:XX:XX"
++);
++
+diff --git a/common/env_flags.c b/common/env_flags.c
+index 985f92e..7d636b5 100644
+--- a/common/env_flags.c
++++ b/common/env_flags.c
+@@ -333,9 +333,6 @@ int env_flags_validate_type(const char *name, const char *value)
+ 		return 0;
+ 	type = env_flags_get_type(name);
+ 	if (_env_flags_validate_type(value, type) < 0) {
+-		printf("## Error: flags type check failure for "
+-			"\"%s\" <= \"%s\" (type: %c)\n",
+-			name, value, env_flags_vartype_rep[type]);
+ 		return -1;
+ 	}
+ 	return 0;
+@@ -499,9 +496,6 @@ int env_flags_validate(const ENTRY *item, const char *newval, enum env_op op,
+ 			(ENV_FLAGS_VARTYPE_BIN_MASK & item->flags);
+ 
+ 		if (_env_flags_validate_type(newval, type) < 0) {
+-			printf("## Error: flags type check failure for "
+-				"\"%s\" <= \"%s\" (type: %c)\n",
+-				name, newval, env_flags_vartype_rep[type]);
+ 			return -1;
+ 		}
+ 	}
+diff --git a/drivers/net/fec_mxc.c b/drivers/net/fec_mxc.c
+index 4cefda4..0f8b2c4 100644
+--- a/drivers/net/fec_mxc.c
++++ b/drivers/net/fec_mxc.c
+@@ -75,6 +75,29 @@ static void swap_packet(uint32_t *packet, int length)
+ }
+ #endif
+ 
++static int read_mac_from_eeprom(unsigned char *mac,unsigned int bus)
++{
++    uint length = 6;
++    uint chip   = 0x50;
++    uint addr   = 0;
++    uint alen   = 1;
++    unsigned char buffer[6];
++    
++    if( i2c_set_bus_num(bus) == -1)
++   {
++       printf("I2c Dev Did not get Set\n");
++        return 0;
++    }
++    //Read 6 buyes of MAC address from eeprom from i2c
++    if (i2c_read(chip, addr, alen, buffer, length) != 0)
++    printf ("Error reading the chip.\n");
++    //printf("Data %pM\n",buffer);
++     memcpy(mac,buffer, 6);
++    return 1;
++}
++
++
++
+ /*
+  * MII-interface related functions
+  */
+@@ -347,6 +370,11 @@ static int fec_get_hwaddr(struct eth_device *dev, int dev_id,
+ 						unsigned char *mac)
+ {
+ 	imx_get_mac_from_fuse(dev_id, mac);
++	 //Function to read mac address from eeprom
++       if(!read_mac_from_eeprom(mac,0))
++       printf("Error reading mac address\n");
++       printf("MAC Address Being getting Set is %pM\n",mac);
++
+ 	return !is_valid_ether_addr(mac);
+ }
+ 
+diff --git a/include/configs/mx6sabresd.h b/include/configs/mx6sabresd.h
+index c576f6b..f0b501d 100644
+--- a/include/configs/mx6sabresd.h
++++ b/include/configs/mx6sabresd.h
+@@ -11,6 +11,8 @@
+ 
+ #include <asm/arch/imx-regs.h>
+ #include <asm/imx-common/gpio.h>
++//Included a command set_mac in u-boot
++#define CONFIG_SET_MAC
+ 
+ #define CONFIG_MACH_TYPE	3980
+ #define CONFIG_MXC_UART_BASE	UART1_BASE
+@@ -23,6 +25,31 @@
+ #endif
+ #define PHYS_SDRAM_SIZE		(1u * 1024 * 1024 * 1024)
+ 
++/* I2C Configs */
++#define CONFIG_CMD_I2C
++#define CONFIG_SYS_I2C
++#define CONFIG_SYS_I2C_MXC
++#define CONFIG_SYS_I2C_MXC_I2C0         /* enable I2C bus 0 */
++#define CONFIG_SYS_I2C_MXC_I2C1                /* enable I2C bus 1 */
++#define CONFIG_SYS_I2C_MXC_I2C2                /* enable I2C bus 2 */
++#define CONFIG_SYS_I2C_MXC_I2C3                /* enable I2C bus 3 */
++#define CONFIG_SYS_I2C_SPEED           100000
++#define CONFIG_ID_EEPROM
++
++/* 
++*  I2C1 EEPROM
++*/
++#define CONFIG_SYS_I2C_EEPROM_NXID
++#define CONFIG_SYS_I2C_EEPROM_ADDR      0x50
++#define CONFIG_SYS_I2C_EEPROM_ADDR_LEN  1
++#define CONFIGi_SYS_EEPROM_BUS_NUM      1
++
++/* PMIC */
++#define CONFIG_POWER
++#define CONFIG_POWER_I2C
++#define CONFIG_POWER_PFUZE100
++#define CONFIG_POWER_PFUZE100_I2C_ADDR 0x08
++
+ #define CONFIG_SUPPORT_EMMC_BOOT /* eMMC specific */
+ 
+ #include "mx6sabre_common.h"
+diff --git a/net/eth.c b/net/eth.c
+index c96e767..fd0637b 100644
+--- a/net/eth.c
++++ b/net/eth.c
+@@ -32,10 +32,10 @@ int eth_getenv_enetaddr(char *name, uchar *enetaddr)
+ int eth_setenv_enetaddr(char *name, const uchar *enetaddr)
+ {
+ 	char buf[20];
+-
+ 	sprintf(buf, "%pM", enetaddr);
+-
+-	return setenv(name, buf);
++	//return setenv(name, buf);
++	//Lumi Vision:
++        return setenv(name,enetaddr); //buf);
+ }
+ 
+ int eth_getenv_enetaddr_by_index(const char *base_name, int index,

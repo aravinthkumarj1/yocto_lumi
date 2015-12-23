@@ -1,0 +1,539 @@
+U-Boot 2014.01 (Dec 03 2015 - 23:03:56)
+
+CPU:   Freescale i.MX6DL rev1.1 at 792 MHz
+Reset cause: POR
+Board: LUMINAIRE-MX6-SabreSD
+I2C:   ready
+DRAM:  1 GiB
+===trigger_pic_command===: MMC:   FSL_SDHC: 0, FSL_SDHC: 1, FSL_SDHC: 2
+auto-detected panel DLPC2607
+enable_dlpc==>> DLPC_GPIO_4: getval:0
+Display: DLPC2607 (800x480)
+In:    serial
+Out:   serial
+Err:   serial
+Net:   IOMUX:: RMII
+FEC [PRIME]
+Hit any key to stop autoboot:  0 
+=> pri
+baudrate=115200
+boot_fdt=try
+bootcmd=mmc dev ${mmcdev};if mmc rescan; then if run loadbootscript; then run bootscript; else if run loaduimage; then run mmcboot; eli
+bootdelay=1
+bootscript=echo Running bootscript from mmc ...; source
+console=ttymxc1,115200 root=/dev/mmcblk0p2 rootwait rw
+emmcdev=2
+ethact=FEC
+ethaddr=88:77:66:55:44:33
+ethprime=FEC
+fdt_addr=0x18000000
+fdt_file=imx6dl-sabresd.dtb
+fdt_high=0xffffffff
+initrd_high=0xffffffff
+ip_dyn=yes
+loadaddr=0x12000000
+loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}
+loaduimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${uimage}
+mmcargs=setenv bootargs console=${console},${baudrate}
+mmcboot=echo Booting from mmc ...; run mmcargs; if test ${boot_fdt} = yes || test ${boot_fdt} = try; then if run loadfdt; then bootm $;
+mmcdev=1
+mmcpart=1
+mmcroot=/dev/mmcblk0p3 rootwait rw
+netargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp
+netboot=echo Booting from net ...; run netargs; if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; ${get;
+script=boot.scr
+uimage=uImage
+update_emmc_firmware=if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; if ${get_cmd} ${update_sd_firmwai
+update_sd_firmware=if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; if mmc dev ${mmcdev}; then if ${gei
+
+Environment size: 2304/8188 bytes
+=> setenv ethaddr 11:33:22:55:44:77
+=> saveenv
+Saving Environment to MMC...
+Writing to MMC(2)... done
+=> boot
+mmc1 is current device
+reading boot.scr
+** Unable to read file boot.scr **
+reading uImage
+4699680 bytes read in 221 ms (20.3 MiB/s)
+Booting from mmc ...
+reading imx6dl-sabresd.dtb
+42600 bytes read in 20 ms (2 MiB/s)
+## Booting kernel from Legacy Image at 12000000 ...
+   Image Name:   Linux-3.10.17-1.0.1_ga+gdac46dc
+   Image Type:   ARM Linux Kernel Image (uncompressed)
+   Data Size:    4699616 Bytes = 4.5 MiB
+   Load Address: 10008000
+   Entry Point:  10008000
+   Verifying Checksum ... OK
+## Flattened Device Tree blob at 18000000
+   Booting using the fdt blob at 0x18000000
+   Loading Kernel Image ... OK
+   Using Device Tree in place at 18000000, end 1800d667
+
+Starting kernel ...
+
+Booting Linux on physical CPU 0x0
+Linux version 3.10.17-1.0.1_ga+gdac46dc (zumi@zumisys7) (gcc version 4.8.2 (GCC) ) #1 SMP PREEMPT Thu Dec 3 21:48:09 IST 2015
+CPU: ARMv7 Processor [412fc09a] revision 10 (ARMv7), cr=10c53c7d
+CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+Machine: Freescale i.MX6 Quad/DualLite (Device Tree), model: Freescale i.MX6 DualLite SABRE Smart Device Board
+cma: CMA: reserved 320 MiB at 3c000000
+Memory policy: ECC disabled, Data cache writealloc
+PERCPU: Embedded 8 pages/cpu @810a5000 s8896 r8192 d15680 u32768
+Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 260096
+Kernel command line: console=ttymxc1,115200 root=/dev/mmcblk0p2 rootwait rw,115200
+PID hash table entries: 4096 (order: 2, 16384 bytes)
+Dentry cache hash table entries: 131072 (order: 7, 524288 bytes)
+Inode-cache hash table entries: 65536 (order: 6, 262144 bytes)
+Memory: 1024MB = 1024MB total
+Memory: 702296k/702296k available, 346280k reserved, 0K highmem
+Virtual kernel memory layout:
+    vector  : 0xffff0000 - 0xffff1000   (   4 kB)
+    fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
+    vmalloc : 0xc0800000 - 0xff000000   (1000 MB)
+    lowmem  : 0x80000000 - 0xc0000000   (1024 MB)
+    pkmap   : 0x7fe00000 - 0x80000000   (   2 MB)
+    modules : 0x7f000000 - 0x7fe00000   (  14 MB)
+      .text : 0x80008000 - 0x8079f5e0   (7774 kB)
+      .init : 0x807a0000 - 0x807e32c0   ( 269 kB)
+      .data : 0x807e4000 - 0x808273a0   ( 269 kB)
+       .bss : 0x808273a0 - 0x8088f1a4   ( 416 kB)
+SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
+Preemptible hierarchical RCU implementation.
+        RCU restricting CPUs from NR_CPUS=4 to nr_cpu_ids=2.
+NR_IRQS:16 nr_irqs:16 16
+L310 cache controller enabled
+l2x0: 16 ways, CACHE_ID 0x410000c8, AUX_CTRL 0x32050000, Cache size: 524288 B
+sched_clock: 32 bits at 3000kHz, resolution 333ns, wraps every 1431655ms
+CPU identified as i.MX6DL, silicon rev 1.1
+Console: colour dummy device 80x30
+Calibrating delay loop... 1581.05 BogoMIPS (lpj=7905280)
+pid_max: default: 32768 minimum: 301
+Mount-cache hash table entries: 512
+CPU: Testing write buffer coherency: ok
+CPU0: thread -1, cpu 0, socket 0, mpidr 80000000
+Setting up static identity map for 0x805b22a8 - 0x805b2300
+CPU1: Booted secondary processor
+CPU1: thread -1, cpu 1, socket 0, mpidr 80000001
+Brought up 2 CPUs
+SMP: Total of 2 processors activated (3162.11 BogoMIPS).
+CPU: All CPU(s) started in SVC mode.
+devtmpfs: initialized
+pinctrl core: initialized pinctrl subsystem
+regulator-dummy: no parameters
+NET: Registered protocol family 16
+DMA: preallocated 256 KiB pool for atomic coherent allocations
+Use WDOG2 as reset source
+syscon 20c8000.anatop: regmap [mem 0x020c8000-0x020c8fff] registered
+vdd1p1: 800 <--> 1375 mV at 1125 mV 
+vdd3p0: 2800 <--> 3150 mV at 3000 mV 
+vdd2p5: 2000 <--> 2750 mV at 2425 mV 
+cpu: 725 <--> 1450 mV at 1150 mV 
+vddpu: 725 <--> 1450 mV at 1150 mV 
+vddsoc: 725 <--> 1450 mV at 1175 mV 
+syscon 20e0000.iomuxc-gpr: regmap [mem 0x020e0000-0x020e0037] registered
+syscon 21bc000.ocotp-ctrl: regmap [mem 0x021bc000-0x021bffff] registered
+===trigger_kernel_pic_command===: 
+===clk_ipg 66000000 ===: 
+===clk_per 80000000 ===: 
+===trigger_kernel_pic_command DONE ===: 
+hw-breakpoint: found 5 (+1 reserved) breakpoint and 1 watchpoint registers.
+hw-breakpoint: maximum watchpoint size is 4 bytes.
+imx6dl-pinctrl 20e0000.iomuxc: initialized IMX pinctrl driver
+bio: create slab <bio-0> at 0
+mxs-dma 110000.dma-apbh: initialized
+usb_otg_vbus: 5000 mV 
+usb_h1_vbus: 5000 mV 
+i2c-core: driver [max17135] using legacy suspend method
+i2c-core: driver [max17135] using legacy resume method
+SCSI subsystem initialized
+usbcore: registered new interface driver usbfs
+usbcore: registered new interface driver hub
+usbcore: registered new device driver usb
+imx-i2c 21a0000.i2c: can't get/select pinctrl
+i2c i2c-0: IMX I2C adapter registered
+i2c i2c-1: IMX I2C adapter registered
+Linux video capture interface: v2.00
+pps_core: LinuxPPS API ver. 1 registered
+pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+PTP clock support registered
+imx-ipuv3 2400000.ipu: IPU DMFC NORMAL mode: 1(0~1), 5B(4,5), 5F(6,7)
+cfg80211: Calling CRDA to update world regulatory domain
+Switching to clocksource mxc_timer1
+NET: Registered protocol family 2
+TCP established hash table entries: 8192 (order: 4, 65536 bytes)
+TCP bind hash table entries: 8192 (order: 4, 65536 bytes)
+TCP: Hash tables configured (established 8192 bind 8192)
+TCP: reno registered
+UDP hash table entries: 512 (order: 2, 16384 bytes)
+UDP-Lite hash table entries: 512 (order: 2, 16384 bytes)
+NET: Registered protocol family 1
+RPC: Registered named UNIX socket transport module.
+RPC: Registered udp transport module.
+RPC: Registered tcp transport module.
+RPC: Registered tcp NFSv4.1 backchannel transport module.
+hw perfevents: enabled with ARMv7 Cortex-A9 PMU driver, 7 counters available
+pureg-dummy: no parameters
+pureg-dummy: no parameters
+pureg-dummy: Failed to create debugfs directory
+Bus freq driver module loaded
+VFS: Disk quotas dquot_6.5.2
+Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
+NFS: Registering the id_resolver key type
+Key type id_resolver registered
+Key type id_legacy registered
+jffs2: version 2.2. (NAND) © 2001-2006 Red Hat, Inc.
+fuse init (API version 7.22)
+msgmni has been set to 2011
+io scheduler noop registered
+io scheduler deadline registered
+io scheduler cfq registered (default)
+imx-weim 21b8000.weim: WEIM driver registered.
+*****mxc_lcdif_init 
+*****mxc_lcdif_probe 
+mxc_lcdif_probe enter
+mxc_lcdif_probe exit
+mxc_sdc_fb fb.20: register mxc display driver lcd
+lcdif_init enter
+Console: switching to colour frame buffer device 100x30
+dlpc2607_init:=====driver registration dlpc2607_init IN  
+dlpc2607_probe: IN  
+<---- Get GPIO [GPIO4_INTF -> GPIO_4:: GPIO1_IO04] for auto initialization status....Done --->>  
+<---- Get GPIO [DLPC_RESETZ -> GPIO_7:: GPIO1_IO07] for RESET....Done --->>  
+<---- Get GPIO [LED_ENABLE -> GPIO_9:: GPIO1_IO09] led-enable-gpios....Done --->>  
+<---- Get GPIO [POWERGOOD -> GPIO_19:: GPIO4_IO05] dlpc-powergood-gpios....Done --->>  
+<---- LED PWM setup IN --->>  
+write_dpp2600_i2c:slave add=1b, reg add=3a, length: 5, verify:0, data:1         IN 
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=38, length: 5, verify:0, data:c4                IN 
+       write_dpp2600_i2c: OUT 
+read_dpp2600_i2c:slave add=1b, reg add=3a
+       read_dpp2600_i2c: OUT, data:0
+read_dpp2600_i2c:slave add=1b, reg add=3a
+       read_dpp2600_i2c: OUT, data:0
+read_dpp2600_i2c:slave add=1b, reg add=39
+       read_dpp2600_i2c: OUT, data:4
+IsPad1000======->0:   
+write_dpp2600_i2c:slave add=1b, reg add=12, length: 5, verify:0, data:1f4               IN 
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=13, length: 5, verify:0, data:1f4               IN 
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=14, length: 5, verify:0, data:1f4               IN 
+       write_dpp2600_i2c: OUT 
+<---- LED PWM setup DONE --->>  
+<---- DMD_PARK setup IN --->>  
+write_dpp2600_i2c:slave add=1b, reg add=2d, length: 5, verify:0, data:0         IN 
+       write_dpp2600_i2c: OUT 
+<---- DMD_PARK setup DONE --->>  
+<---- DISPLAY CONFIGURATION IN --->>  
+<---- DISPLAY CONFIGURATION TPG --->>  
+read_dpp2600_i2c:slave add=1b, reg add=a6
+       read_dpp2600_i2c: OUT, data:0
+write_dpp2600_i2c:slave add=1b, reg add=a6, length: 5, verify:0, data:0         IN 
+       write_dpp2600_i2c: OUT 
+read_dpp2600_i2c:slave add=1b, reg add=a6
+       read_dpp2600_i2c: OUT, data:0
+write_dpp2600_i2c:slave add=1b, reg add=a6, length: 5, verify:0, data:1         IN 
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=82, length: 5, verify:1, data:0         IN 
+read_dpp2600_i2c:slave add=1b, reg add=82
+       read_dpp2600_i2c: OUT, data:0
+       write_dpp2600_i2c: OUT 
+read_dpp2600_i2c:slave add=1b, reg add=34
+       read_dpp2600_i2c: OUT, data:1
+write_dpp2600_i2c:slave add=1b, reg add=c, length: 5, verify:1, data:f          IN 
+read_dpp2600_i2c:slave add=1b, reg add=c
+       read_dpp2600_i2c: OUT, data:f
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=1e, length: 5, verify:1, data:0         IN 
+read_dpp2600_i2c:slave add=1b, reg add=1e
+       read_dpp2600_i2c: OUT, data:0
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=11, length: 5, verify:1, data:d         IN 
+read_dpp2600_i2c:slave add=1b, reg add=11
+       read_dpp2600_i2c: OUT, data:d
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=b, length: 5, verify:1, data:1          IN 
+read_dpp2600_i2c:slave add=1b, reg add=b
+       read_dpp2600_i2c: OUT, data:1
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=c3, length: 5, verify:1, data:0         IN 
+read_dpp2600_i2c:slave add=1b, reg add=c3
+       read_dpp2600_i2c: OUT, data:0
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=82, length: 5, verify:1, data:1         IN 
+read_dpp2600_i2c:slave add=1b, reg add=82
+       read_dpp2600_i2c: OUT, data:1
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=0, length: 5, verify:1, data:1          IN 
+read_dpp2600_i2c:slave add=1b, reg add=0
+       read_dpp2600_i2c: OUT, data:4000
+write_dpp2600_i2c:verify error:slave add=1b
+       write_dpp2600_i2c: OUT 
+read_dpp2600_i2c:slave add=1b, reg add=a6
+       read_dpp2600_i2c: OUT, data:1
+write_dpp2600_i2c:slave add=1b, reg add=a6, length: 5, verify:0, data:0         IN 
+       write_dpp2600_i2c: OUT 
+read_dpp2600_i2c:slave add=1b, reg add=a6
+       read_dpp2600_i2c: OUT, data:0
+<---- DISPLAY CONFIGURATION DONE --->>  
+<---- DO HORIZONTAL FLIP --->>  
+write_dpp2600_i2c:slave add=1b, reg add=f, length: 5, verify:1, data:1          IN 
+read_dpp2600_i2c:slave add=1b, reg add=f
+       read_dpp2600_i2c: OUT, data:1
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=10, length: 5, verify:1, data:0         IN 
+read_dpp2600_i2c:slave add=1b, reg add=10
+       read_dpp2600_i2c: OUT, data:0
+       write_dpp2600_i2c: OUT 
+<---- HORIZONTAL FLIP DONE --->>  
+<---- TURNING ON  R,G,B LEDs... --->>  
+write_dpp2600_i2c:slave add=1b, reg add=16, length: 5, verify:0, data:1         IN 
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=16, length: 5, verify:0, data:3         IN 
+       write_dpp2600_i2c: OUT 
+write_dpp2600_i2c:slave add=1b, reg add=16, length: 5, verify:0, data:7         IN 
+       write_dpp2600_i2c: OUT 
+<---- TURNING ON  R,G,B LEDs... DONE --->>  
+dlpc2607_probe: OUT  
+dlpc2607_init:=====driver registration dlpc2607_init OUT 
+===============dlpc_2607_device_init: IN  
+===============register_dlpc_device: OUT  0 
+imx-sdma 20ec000.sdma: no iram assigned, using external mem
+imx-sdma 20ec000.sdma: loaded firmware 1.1
+imx-sdma 20ec000.sdma: initialized
+pfuze100-regulator 0-0008: Full lay: 1, Metal lay: 1
+pfuze100-regulator 0-0008: FAB: 0, FIN: 1
+SW1AB: 300 <--> 1875 mV at 1375 mV 
+SW1C: 300 <--> 1875 mV at 1375 mV 
+SW2: 800 <--> 3300 mV at 3300 mV 
+SW3A: 400 <--> 1975 mV at 1500 mV 
+SW3B: 400 <--> 1975 mV at 1500 mV 
+SW4: 800 <--> 3300 mV at 3150 mV 
+SWBST: 5000 <--> 5150 mV at 5000 mV 
+VSNVS: 1000 <--> 3000 mV at 3000 mV 
+VREFDDR: 750 mV 
+VGEN1: 800 <--> 1550 mV at 1500 mV 
+VGEN2: 800 <--> 1550 mV at 1500 mV 
+VGEN3: 1800 <--> 3300 mV at 2500 mV 
+VGEN4: 1800 <--> 3300 mV at 1800 mV 
+VGEN5: 1800 <--> 3300 mV at 2800 mV 
+VGEN6: 1800 <--> 3300 mV at 3300 mV 
+Serial: IMX driver
+2020000.serial: ttymxc1 at MMIO 0x2020000 (irq = 58) is a IMX
+console [ttymxc1] enabled
+21ec000.serial: ttymxc0 at MMIO 0x21ec000 (irq = 60) is a IMX
+serial: Freescale lpuart driver
+[drm] Initialized drm 1.1.0 20060810
+[drm] Initialized vivante 1.0.0 20120216 on minor 0
+brd: module loaded
+loop: module loaded
+CAN device driver interface
+libphy: fec_enet_mii_bus: probed
+fec 2188000.ethernet eth0: registered PHC device 0
+ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+usbcore: registered new interface driver usb-storage
+i2c-core: driver [isl29023] using legacy suspend method
+i2c-core: driver [isl29023] using legacy resume method
+snvs_rtc 20cc034.snvs-rtc-lp: rtc core: registered 20cc034.snvs-rtc-lp as rtc0
+i2c /dev entries driver
+mxc_v4l2_output v4l2_out.23: V4L2 device registered as video16
+mxc_v4l2_output v4l2_out.23: V4L2 device registered as video17
+i2c-core: driver [mag3110] using legacy suspend method
+i2c-core: driver [mag3110] using legacy resume method
+imx2-wdt 20bc000.wdog: IMX2+ Watchdog Timer enabled. timeout=60s (nowayout=0)
+cpuidle: using governor ladder
+cpuidle: using governor menu
+sdhci: Secure Digital Host Controller Interface driver
+sdhci: Copyright(c) Pierre Ossman
+sdhci-pltfm: SDHCI platform and OF driver helper
+mmc0: no vqmmc regulator found
+mmc0: no vmmc regulator found
+mmc0: SDHCI controller on 2198000.usdhc [2198000.usdhc] using ADMA
+mmc1: no vqmmc regulator found
+mmc1: no vmmc regulator found
+mmc1: SDHCI controller on 219c000.usdhc [219c000.usdhc] using ADMA
+mmc0: new high speed SDHC card at address 59b4
+mmcblk0: mmc0:59b4 SS08G 7.40 GiB (ro)
+ mmcblk0: p1 p2 p3
+mmc1: BKOPS_EN bit is not set
+mmc1: new high speed DDR MMC card at address 0001
+mmcblk1: mmc1:0001 W10008 3.64 GiB 
+mmcblk1boot0: mmc1:0001 W10008 partition 1 4.00 MiB
+mmcblk1boot1: mmc1:0001 W10008 partition 2 4.00 MiB
+mmcblk1rpmb: mmc1:0001 W10008 partition 3 4.00 MiB
+ mmcblk1: p1 p2 p3
+ mmcblk1boot1: unknown partition table
+ mmcblk1boot0: unknown partition table
+Galcore version 4.6.9.9754
+mxc_vdoa 21e4000.vdoa: i.MX Video Data Order Adapter(VDOA) driver probed
+mxc_vpu 2040000.vpu: VPU initialized
+leds-gpio leds.16: pins are not configured from the driver
+caam 2100000.caam: device ID = 0x0a16010000000100 (Era -524)
+caam 2100000.caam: job rings = 2, qi = 0
+caam 2100000.caam: authenc-hmac-md5-cbc-aes-caam
+caam 2100000.caam: authencesn-hmac-md5-cbc-aes-caam
+caam 2100000.caam: authenc-hmac-sha1-cbc-aes-caam
+caam 2100000.caam: authencesn-hmac-sha1-cbc-aes-caam
+caam 2100000.caam: authenc-hmac-sha224-cbc-aes-caam
+caam 2100000.caam: authencesn-hmac-sha224-cbc-aes-caam
+caam 2100000.caam: authenc-hmac-sha256-cbc-aes-caam
+caam 2100000.caam: authencesn-hmac-sha256-cbc-aes-caam
+caam 2100000.caam: authenc-hmac-md5-cbc-des3_ede-caam
+caam 2100000.caam: authencesn-hmac-md5-cbc-des3_ede-caam
+caam 2100000.caam: authenc-hmac-sha1-cbc-des3_ede-caam
+caam 2100000.caam: authencesn-hmac-sha1-cbc-des3_ede-caam
+caam 2100000.caam: authenc-hmac-sha224-cbc-des3_ede-caam
+caam 2100000.caam: authencesn-hmac-sha224-cbc-des3_ede-caam
+caam 2100000.caam: authenc-hmac-sha256-cbc-des3_ede-caam
+caam 2100000.caam: authencesn-hmac-sha256-cbc-des3_ede-caam
+caam 2100000.caam: authenc-hmac-md5-cbc-des-caam
+caam 2100000.caam: authencesn-hmac-md5-cbc-des-caam
+caam 2100000.caam: authenc-hmac-sha1-cbc-des-caam
+caam 2100000.caam: authencesn-hmac-sha1-cbc-des-caam
+caam 2100000.caam: authenc-hmac-sha224-cbc-des-caam
+caam 2100000.caam: authencesn-hmac-sha224-cbc-des-caam
+caam 2100000.caam: authenc-hmac-sha256-cbc-des-caam
+caam 2100000.caam: authencesn-hmac-sha256-cbc-des-caam
+caam 2100000.caam: ecb-des-caam
+caam 2100000.caam: ecb-arc4-caam
+caam 2100000.caam: ecb-aes-caam
+caam 2100000.caam: ctr-aes-caam
+caam 2100000.caam: cbc-aes-caam
+caam 2100000.caam: ecb-des3-caam
+caam 2100000.caam: cbc-3des-caam
+caam 2100000.caam: cbc-des-caam
+caam 2100000.caam: fsl,sec-v4.0 algorithms registered in /proc/crypto
+platform 2101000.jr0: registering rng-caam
+platform caam_sm: caam_sm_test: 8-byte key test match OK
+platform caam_sm: caam_sm_test: 16-byte key test match OK
+platform caam_sm: caam_sm_test: 32-byte key test match OK
+platform caam_secvio.24: security violation service handlers armed
+usbcore: registered new interface driver usbhid
+usbhid: USB HID core driver
+TCP: cubic registered
+NET: Registered protocol family 10
+sit: IPv6 over IPv4 tunneling driver
+NET: Registered protocol family 17
+can: controller area network core (rev 20120528 abi 9)
+NET: Registered protocol family 29
+can: raw protocol (rev 20120528)
+can: broadcast manager protocol (rev 20120528 t)
+can: netlink gateway (rev 20130117) max_hops=1
+8021q: 802.1Q VLAN Support v1.8
+Key type dns_resolver registered
+VFP support v0.3: implementor 41 architecture 3 part 30 variant 9 rev 4
+vddpu: disabling
+snvs_rtc 20cc034.snvs-rtc-lp: setting system clock to 1970-01-01 00:00:00 UTC (0)
+EXT3-fs (mmcblk0p2): mounted filesystem with ordered data mode
+kjournald starting.  Commit interval 5 seconds
+VFS: Mounted root (ext3 filesystem) readonly on device 179:2.
+devtmpfs: mounted
+Freeing unused kernel memory: 268K (807a0000 - 807e3000)
+INIT: version 2.88 booting
+Starting udev
+udevd[154]: starting version 182
+Starting Bootlog daemon: bootlogd: cannot allocate pseudo tty: No such file or directory
+bootlogd.
+urandom start: failed.
+Populating dev cache
+tar: can't open '/etc/dev.tar': Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 84: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 84: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 84: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 84: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 84: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+rm: can't remove '/tmp': Read-only file system
+ln: /tmp/tmp: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 33: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 33: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 84: /etc/volatile.cache.build: Read-only file system
+ln: /etc/resolv.conf: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 33: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+/etc/rcS.d/S37populate-volatile.sh: line 56: /etc/volatile.cache.build: Read-only file system
+ALSA: Restoring mixer settings...
+/usr/sbin/alsactl: state_lock:121: file /var/lib/alsa/asound.state lock error: Read-only file system
+/usr/sbin/alsactl: load_state:1677: Cannot open /var/lib/alsa/asound.state for reading: Read-only file system
+Fri Dec 18 10:23:00 UTC 2015
+INIT: Entering runlevel: 5
+Configuring network interfaces... fec 2188000.ethernet eth0: Freescale FEC PHY driver [Micrel KSZ8081 or KSZ8091] (mii_bus:phy_addr=21)
+IPv6: ADDRCONF(NETDEV_UP): eth0: link is not ready
+udhcpc (v1.22.1) started
+Sending discover...
+Sending discover...
+Sending discover...
+No lease, failing
+Failed to open "/etc/machine-id": No such file or directory
+Starting system message bus: dbus.
+Starting rpcbind daemon...done.
+Starting advanced power management daemon: No APM support in kernel
+(failed.)
+Starting Samba: smbd nmbd.
+Starting syslogd/klogd: done
+ * Starting Avahi mDNS/DNS-SD Daemon: avahi-daemon
+   ...done.
+Starting Telephony daemon
+/etc/rc5.d/S51poolserver.sh: line 8: /etc/issue: Read-only file system
+***POOLSRV_SYMLINK_ROOT_DIR NOT AVAILABLE. MAKE IT
+ln: /usr/share/webapps/poolsrv: Read-only file system
+/etc/rc5.d/S51poolserver.sh: line 35: cd: /usr/share/webapps/poolsrv: No such file or directory
+/etc/rc5.d/S51poolserver.sh: line 36: ./run.sh: No such file or directory
+Starting Linux NFC daemon
+Starting web server: apache2(30)Read-only file system: AH00091: httpd: could not open error log file /var/apache2/logs/error_log.
+AH00015: Unable to open logs
+failed
+Stopping Bootlog daemon: bootlogd.
+
+Poky (Yocto Project Reference Distro) 1.6.1 imx6dlsabresd /dev/ttymxc1
+
+imx6dlsabresd login: root
+root@imx6dlsabresd:~# cd /
+root@imx6dlsabresd:/# ls
+bin         etc         lost+found  proc        sys         var
+boot        home        media       run         tmp
+dev         lib         mnt         sbin        usr
+root@imx6dlsabresd:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 88:77:66:55:44:33  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@imx6dlsabresd:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 88:77:66:55:44:33  
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@imx6dlsabresd:/# 
+root@imx6dlsabresd:/#

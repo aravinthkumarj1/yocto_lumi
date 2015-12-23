@@ -1,0 +1,32 @@
+baudrate=115200
+boot_fdt=try
+bootcmd=mmc dev ${mmcdev};if mmc rescan; then if run loadbootscript; then run bootscript; else if run loaduimage; then run mmcboot; eli
+bootdelay=1
+bootscript=echo Running bootscript from mmc ...; source
+setenv console ttymxc1,115200 root=/dev/mmcblk0p2 rootwait rw 
+emmcdev=2
+ethact=FEC
+ethaddr=88:77:66:55:44:33
+ethprime=FEC
+fdt_addr=0x18000000
+fdt_file=imx6dl-sabresd.dtb
+fdt_high=0xffffffff
+initrd_high=0xffffffff
+ip_dyn=yes
+loadaddr=0x12000000
+loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}
+loaduimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${uimage}
+setenv mmcargs 'setenv bootargs console=${console},${baudrate}'
+mmcboot=echo Booting from mmc ...; run mmcargs; if test ${boot_fdt} = yes || test ${boot_fdt} = try; then if run loadfdt; then bootm $;
+mmcdev=1
+mmcpart=1
+mmcroot=/dev/mmcblk0p3 rootwait rw
+netargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp
+netboot=echo Booting from net ...; run netargs; if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; ${get;
+script=boot.scr
+uimage=uImage
+update_emmc_firmware=if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; if ${get_cmd} ${update_sd_firmwai
+update_sd_firmware=if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; if mmc dev ${mmcdev}; then if ${gei
+
+Environment size: 2304/8188 bytes

@@ -1,0 +1,10 @@
+=> setenv ethaddr 
+=> saveenv
+=> setmac 00:11:22:33:44:55
+=> reset
+
+
+Note:-
+
+1. User should enter valid mac address in proper pattern.(Ex:00:xx:xx:xx:xx:xx) 
+2. User can verify  mac address in eeprom using command: i2c md 0x50 0 6

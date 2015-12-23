@@ -1,0 +1,4 @@
+fatload mmc 1:1 0x17000000 imx6dl-sabresd.dtb; fatload mmc 1:1 0x12100000 uImage;bootm 0x12100000 - 0x17000000
+
+
+setenv mmcboot 'run mmcargs; run loadfdt; bootm ${loadaddr}'
